@@ -56,9 +56,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Bogus">
-      <Version>18.0.2</Version>
-    </PackageReference>
     <PackageReference Include="NServiceBus">
       <Version>6.4.0</Version>
     </PackageReference>

@@ -12,16 +12,27 @@ class Program
     static async Task Main()
     {
         LogManager.Use<DefaultFactory>().Level(LogLevel.Error);
-        var size = 25;
+        var endpointSize = 25;
+        var instanceModulo = 4;
+
+        var providers = new[] { "Payment", "Audit", "Approval", "Ledger", "Integration", "Broadcast", "Notification", "Identity", "Tax", "Exchange" };
+        var types = new[] { "Service", "Gateway", "Adapter", "Translator", "Provider" };
+        var ou = new[] { "Sales", "Transport", "Accounting", "Marketing", "Support", "Development", "Research", "HumanResourceManagement", "Production", "Purchasing" };
+
+        var random = new Random(1337);
 
         Console.WriteLine("Creating instances");
         var tasks = new List<Task<Tuple<string, IEndpointInstance>>>();
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < endpointSize; ++i)
         {
-            for (int j = 0; j < i % 4 + 1; j++)
+            var endpointName = $"$ParticularLabs.{ou[random.Next(ou.Length)]}.{providers[random.Next(providers.Length)]}{types[random.Next(types.Length)]}";
+            await Console.Out.WriteAsync($"Initializing {endpointName}").ConfigureAwait(false);
+            for (int j = 0; j < i % instanceModulo + 1; j++)
             {
-                tasks.Add(Create($"labs.{i:000}", j));
+                await Console.Out.WriteAsync(".").ConfigureAwait(false);
+                tasks.Add(Create(endpointName, j));
             }
+            await Console.Out.WriteLineAsync().ConfigureAwait(false);
         }
 
         await Console.Out.WriteLineAsync("Starting...").ConfigureAwait(false);
@@ -42,7 +53,7 @@ class Program
         await Task.Yield();
         var cfg = new EndpointConfiguration(name);
         //cfg.MakeInstanceUniquelyAddressable(instance.ToString("000"));
-        if(Debugger.IsAttached) cfg.EnableInstallers();
+        if (Debugger.IsAttached) cfg.EnableInstallers();
         //cfg.ForwardReceivedMessagesTo("audit");
         cfg.UsePersistence<InMemoryPersistence>();
         cfg.SendFailedMessagesTo("error");
