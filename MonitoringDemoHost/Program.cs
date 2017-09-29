@@ -8,13 +8,15 @@ using NServiceBus.Logging;
 
 class Program
 {
+    static Guid NamespaceIdentifier = GuidUtility.Create(Guid.Empty, "monitoringdemohost");
     static TimeSpan MetricsReportingInterval = TimeSpan.FromSeconds(2.5);
     static int EndpointSize = 25;
     static int InstanceModulo = 4;
     static int RecoverabilityImmediateRetryCount = 1;
     static int RecoverabilityDelayedRetryCount = 5;
     static TimeSpan RecoverabilityDelayedRetryBackoffIncrement = TimeSpan.FromSeconds(1);
-    static bool AuditForwardingEnabled = false;
+    static bool AuditForwardingEnabled = true;
+    static bool UseRandomHostId = true;
 
     public static Tuple<string, IEndpointInstance>[] Instances;
     static async Task Main()
@@ -25,7 +27,7 @@ class Program
         var types = new[] { "Service", "Gateway", "Adapter", "Translator", "Provider", "Generator" };
         var ou = new[] { "Sales", "Transport", "Accounting", "Marketing", "Support", "Development", "Research", "HumanResourceManagement", "Production", "Purchasing" };
 
-        var random = new Random(1337);
+        var random = new Random(1337); // Makes sure that random endpoints names are repeatable
 
         Console.WriteLine("Creating instances");
         var tasks = new List<Task<Tuple<string, IEndpointInstance>>>();
@@ -57,10 +59,11 @@ class Program
     static async Task<Tuple<string, IEndpointInstance>> Create(string name, int instance)
     {
         await Task.Yield();
+        var instanceSuffix = instance.ToString("000");
         var cfg = new EndpointConfiguration(name);
-        //cfg.MakeInstanceUniquelyAddressable(instance.ToString("000"));
+        //cfg.MakeInstanceUniquelyAddressable(instanceSuffix);
         if (Debugger.IsAttached) cfg.EnableInstallers();
-        if(AuditForwardingEnabled) cfg.ForwardReceivedMessagesTo("audit");
+        if (AuditForwardingEnabled) cfg.ForwardReceivedMessagesTo("audit");
         cfg.UsePersistence<InMemoryPersistence>();
         cfg.SendFailedMessagesTo("error");
 
@@ -79,6 +82,12 @@ class Program
         var transport = cfg.UseTransport<MsmqTransport>();
         transport.Transactions(TransportTransactionMode.SendsAtomicWithReceive); // Lower transaction mode to prevent transaction issues with MSDTC.
         transport.ApplyLabelToMessages(headers => (headers.ContainsKey(Headers.EnclosedMessageTypes) ? headers[Headers.EnclosedMessageTypes].Substring(0, Math.Min(200, headers[Headers.EnclosedMessageTypes].Length)) + "@" : string.Empty) + DateTime.UtcNow.ToString("O"));
+
+        var hostId = UseRandomHostId
+            ? Guid.NewGuid()
+            : GuidUtility.Create(NamespaceIdentifier, $"{name}-{instanceSuffix}");
+
+        cfg.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(hostId);
 
 #pragma warning disable 618
         cfg.EnableMetrics().SendMetricDataToServiceControl(

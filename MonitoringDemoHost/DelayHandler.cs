@@ -13,7 +13,7 @@ class DelayHandler : IHandleMessages<object>
     {
         lock (Random)
         {
-            max = Random.Next(2000);
+            max = Random.Next(100);
         }
     }
 
