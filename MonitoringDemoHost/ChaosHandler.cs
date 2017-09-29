@@ -6,13 +6,15 @@ using NServiceBus.Logging;
 class ChaosHandler : IHandleMessages<object>
 {
     readonly ILog Log = LogManager.GetLogger<ChaosHandler>();
-    readonly Random Random;
+    static readonly Random Random = new Random();
     readonly double Thresshold;
 
     public ChaosHandler()
     {
-        Random = new Random();
-        Thresshold = Random.NextDouble() * 0.55;
+        lock (Random)
+        {
+            Thresshold = Random.NextDouble() * 0.50;
+        }
     }
 
     public Task Handle(object message, IMessageHandlerContext context)

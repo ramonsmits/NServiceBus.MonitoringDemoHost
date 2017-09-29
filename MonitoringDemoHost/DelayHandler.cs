@@ -6,12 +6,15 @@ using NServiceBus.Logging;
 class DelayHandler : IHandleMessages<object>
 {
     static readonly ILog Log = LogManager.GetLogger<DelayHandler>();
-    readonly Random Random = new Random();
+    static readonly Random Random = new Random();
     readonly int max;
 
     public DelayHandler()
     {
-        max = Random.Next(2000);
+        lock (Random)
+        {
+            max = Random.Next(2000);
+        }
     }
 
     public Task Handle(object message, IMessageHandlerContext context)

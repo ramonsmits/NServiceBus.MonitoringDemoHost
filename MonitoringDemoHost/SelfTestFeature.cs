@@ -21,8 +21,10 @@ namespace Store.Shared.SelfTest
 
     class MyStartupTask : FeatureStartupTask
     {
+        static Random random = new Random();
         Task loop;
         bool stop;
+
         protected override Task OnStart(IMessageSession session)
         {
             loop = Loop(session);
@@ -31,14 +33,22 @@ namespace Store.Shared.SelfTest
 
         async Task Loop(IMessageSession session)
         {
-            var random = new Random();
-            var randomMin = random.Next(100);
-            var randomMax = random.Next(randomMin, 5000);
+            int min, max;
+            lock (random)
+            {
+                min = random.Next(100);
+                max = random.Next(min, 1000);
+            }
 
             while (!stop)
             {
                 await session.SendLocal(new Ping()).ConfigureAwait(false);
-                await Task.Delay(TimeSpan.FromMilliseconds(random.Next(randomMin, randomMax))).ConfigureAwait(false);
+                int delay;
+                lock (random)
+                {
+                    delay = random.Next(min, max);
+                }
+                await Task.Delay(TimeSpan.FromMilliseconds(delay)).ConfigureAwait(false);
             }
         }
         protected override Task OnStop(IMessageSession session)
