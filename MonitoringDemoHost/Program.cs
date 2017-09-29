@@ -16,12 +16,17 @@ class Program
     static int RecoverabilityDelayedRetryCount = 5;
     static TimeSpan RecoverabilityDelayedRetryBackoffIncrement = TimeSpan.FromSeconds(1);
     static bool AuditForwardingEnabled = true;
-    static bool UseRandomHostId = true;
+    static bool UseRandomHostId = false;
+    static LogLevel LogLevel = LogLevel.Error;
+    static TimeSpan HeartbeatInterval = TimeSpan.FromMilliseconds(100);
+    static TimeSpan HeartbeatTTL = TimeSpan.FromHours(1);
 
     public static Tuple<string, IEndpointInstance>[] Instances;
     static async Task Main()
     {
-        LogManager.Use<DefaultFactory>().Level(LogLevel.Error);
+        if (Environment.UserInteractive) Console.Title = "Monitoring demo host";
+
+        LogManager.Use<DefaultFactory>().Level(LogLevel);
 
         var providers = new[] { "Payment", "Audit", "Approval", "Ledger", "Integration", "Broadcast", "Notification", "Identity", "Report", "Exchange" };
         var types = new[] { "Service", "Gateway", "Adapter", "Translator", "Provider", "Generator" };
@@ -96,6 +101,9 @@ class Program
             instance.ToString("000")
             );
 #pragma warning restore 618
+
+        cfg.HeartbeatPlugin("particular.servicecontrol", HeartbeatInterval, HeartbeatTTL);
+
         return Tuple.Create(name, await Endpoint.Start(cfg).ConfigureAwait(false));
     }
 }
