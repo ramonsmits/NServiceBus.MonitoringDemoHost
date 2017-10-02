@@ -18,8 +18,8 @@ class Program
     static bool AuditForwardingEnabled = true;
     static bool UseRandomHostId = false;
     static LogLevel LogLevel = LogLevel.Error;
-    static TimeSpan HeartbeatInterval = TimeSpan.FromMilliseconds(100);
-    static TimeSpan HeartbeatTTL = TimeSpan.FromHours(1);
+    static TimeSpan HeartbeatInterval = MetricsReportingInterval;
+    static TimeSpan HeartbeatTTL = TimeSpan.FromTicks(MetricsReportingInterval.Ticks * 4);
 
     public static Tuple<string, IEndpointInstance>[] Instances;
     static async Task Main()
