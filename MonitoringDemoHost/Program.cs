@@ -19,7 +19,7 @@ class Program
     static bool UseRandomHostId = false;
     static LogLevel LogLevel = LogLevel.Error;
     static TimeSpan HeartbeatInterval = MetricsReportingInterval;
-    static TimeSpan HeartbeatTTL = TimeSpan.FromTicks(MetricsReportingInterval.Ticks * 4);
+    static TimeSpan HeartbeatTTL = TimeSpan.FromTicks(HeartbeatInterval.Ticks* 4);
 
     public static Tuple<string, IEndpointInstance>[] Instances;
     static async Task Main()
