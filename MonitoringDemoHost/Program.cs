@@ -53,7 +53,7 @@ class Program
 
         await Console.Out.WriteAsync("Starting...").ConfigureAwait(false);
         Instances = await Task.WhenAll(tasks).ConfigureAwait(false);
-        await Console.Out.WriteAsync($"Done! Took {start.Elapsed} to start {Instances.Length} instances.").ConfigureAwait(false);
+        await Console.Out.WriteLineAsync($"Done! Took {start.Elapsed} to start {Instances.Length} instances.").ConfigureAwait(false);
         await Console.Out.WriteLineAsync("Press ESC to exit...").ConfigureAwait(false);
 
         while (Console.ReadKey().Key != ConsoleKey.Escape)
