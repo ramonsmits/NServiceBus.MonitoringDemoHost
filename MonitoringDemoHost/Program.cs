@@ -90,6 +90,7 @@ class Program
 
 
         var transport = cfg.UseTransport<MsmqTransport>();
+        transport.ConnectionString("deadLetter=false");
         transport.Transactions(TransportTransactionMode.SendsAtomicWithReceive); // Lower transaction mode to prevent transaction issues with MSDTC.
         transport.ApplyLabelToMessages(headers => (headers.ContainsKey(Headers.EnclosedMessageTypes) ? headers[Headers.EnclosedMessageTypes].Substring(0, Math.Min(200, headers[Headers.EnclosedMessageTypes].Length)) + "@" : string.Empty) + DateTime.UtcNow.ToString("O"));
 
