@@ -43,7 +43,7 @@ class Program
         for (int i = 0; i < EndpointSize; ++i)
         {
             var endpointName = $"$ParticularLabs.{ou[random.Next(ou.Length)]}.{providers[random.Next(providers.Length)]}{types[random.Next(types.Length)]}";
-            await Console.Out.WriteAsync($"Initializing {endpointName}").ConfigureAwait(false);
+            await Console.Out.WriteAsync($"\tInitializing {endpointName}").ConfigureAwait(false);
             for (int j = 0; j < i % InstanceModulo + 1; j++)
             {
                 await Console.Out.WriteAsync(".").ConfigureAwait(false);
