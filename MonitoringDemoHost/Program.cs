@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
@@ -65,16 +66,15 @@ class Program
         await Console.Out.WriteLineAsync("Stopped!").ConfigureAwait(false);
     }
 
-    static async Task<(string name, IEndpointInstance)> Create(string name, int instance)
+    static async Task<(string name, IEndpointInstance)> Create(string endpointName, int instanceNr)
     {
-        var instanceSuffix = instance.ToString("000");
-        var cfg = new EndpointConfiguration(name);
+        var instanceSuffix = instanceNr.ToString("000");
+        var cfg = new EndpointConfiguration(endpointName);
         //cfg.MakeInstanceUniquelyAddressable(instanceSuffix);
         if (Debugger.IsAttached) cfg.EnableInstallers();
         if (AuditForwardingEnabled) cfg.ForwardReceivedMessagesTo("audit");
         cfg.UsePersistence<InMemoryPersistence>();
         cfg.SendFailedMessagesTo("error");
-
         cfg.Recoverability()
             .Immediate(c => c.NumberOfRetries(RecoverabilityImmediateRetryCount))
             .Delayed(c => c.NumberOfRetries(RecoverabilityDelayedRetryCount).TimeIncrease(RecoverabilityDelayedRetryBackoffIncrement));
@@ -95,7 +95,7 @@ class Program
 
         var hostId = UseRandomHostId
             ? Guid.NewGuid()
-            : GuidUtility.Create(NamespaceIdentifier, $"{name}-{instanceSuffix}");
+            : GuidUtility.Create(NamespaceIdentifier, $"{endpointName}-{instanceSuffix}");
 
 #pragma warning disable CS0618 // Type or member is obsolete
         cfg.EnableCriticalTimePerformanceCounter();
@@ -103,15 +103,19 @@ class Program
         cfg.UniquelyIdentifyRunningInstance().UsingCustomIdentifier(hostId);
 
 #pragma warning disable 618
+
+        var fakeHostName = Dns.GetHostName() + instanceSuffix;
+        var instanceId = endpointName + "@" + fakeHostName;
+
         cfg.EnableMetrics().SendMetricDataToServiceControl(
             MonitoringQueue,
-            MetricsReportingInterval,
-            instance.ToString("000")
+            MetricsReportingInterval
+            //,instanceId
             );
 #pragma warning restore 618
 
         cfg.HeartbeatPlugin(HeartbeatQueue, HeartbeatInterval, HeartbeatTTL);
 
-        return (name, await Endpoint.Start(cfg).ConfigureAwait(false));
+        return (endpointName, await Endpoint.Start(cfg).ConfigureAwait(false));
     }
 }
