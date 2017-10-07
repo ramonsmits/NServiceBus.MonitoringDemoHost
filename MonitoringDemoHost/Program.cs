@@ -67,7 +67,6 @@ class Program
 
     static async Task<(string name, IEndpointInstance)> Create(string name, int instance)
     {
-        await Task.Yield();
         var instanceSuffix = instance.ToString("000");
         var cfg = new EndpointConfiguration(name);
         //cfg.MakeInstanceUniquelyAddressable(instanceSuffix);
