@@ -16,13 +16,13 @@ class Program
     static int RecoverabilityImmediateRetryCount = 1;
     static int RecoverabilityDelayedRetryCount = 5;
     static TimeSpan RecoverabilityDelayedRetryBackoffIncrement = TimeSpan.FromSeconds(1);
-    static bool AuditForwardingEnabled = true;
+    static bool AuditForwardingEnabled = false;
     static bool UseRandomHostId = false;
     static LogLevel LogLevel = LogLevel.Error;
     static TimeSpan HeartbeatInterval = MetricsReportingInterval;
     static TimeSpan HeartbeatTTL = TimeSpan.FromTicks(HeartbeatInterval.Ticks * 4);
     static string HeartbeatQueue = "Particular.ServiceControl";
-    static string MonitoringQueue = HeartbeatQueue + ".Monitoring";
+    static string MonitoringQueue = "Particular.Monitoring";
 
     public static (string name, IEndpointInstance instance)[] Instances;
     static async Task Main()
@@ -88,7 +88,6 @@ class Program
         });
         cfg.LimitMessageProcessingConcurrencyTo(4 * Environment.ProcessorCount);
 
-
         var transport = cfg.UseTransport<MsmqTransport>();
         transport.ConnectionString("deadLetter=false");
         transport.Transactions(TransportTransactionMode.SendsAtomicWithReceive); // Lower transaction mode to prevent transaction issues with MSDTC.
@@ -108,12 +107,29 @@ class Program
         var fakeHostName = Dns.GetHostName() + instanceSuffix;
         var instanceId = endpointName + "@" + fakeHostName;
 
-        cfg.EnableMetrics().SendMetricDataToServiceControl(
+        var metrics = cfg.EnableMetrics();
+        metrics.SendMetricDataToServiceControl(
             MonitoringQueue,
             MetricsReportingInterval
-            //,instanceId
+            , instanceId
             );
 #pragma warning restore 618
+
+        //metrics.RegisterObservers(x =>
+        //{
+        //    foreach (var s in x.Signals)
+        //    {
+        //        switch (s.Name)
+        //        {
+        //            case "# of msgs failures / sec":
+        //                s.Register((ref SignalEvent @event) => Console.Out.WriteAsync("f"));
+        //                break;
+        //            case "# of msgs successfully processed / sec":
+        //                s.Register((ref SignalEvent @event) => Console.Out.WriteAsync("."));
+        //                break;
+        //        }
+        //    }
+        //});
 
         cfg.HeartbeatPlugin(HeartbeatQueue, HeartbeatInterval, HeartbeatTTL);
 
