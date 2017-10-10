@@ -43,6 +43,7 @@ namespace Store.Shared.SelfTest
             while (!stop)
             {
                 await session.SendLocal(new Ping()).ConfigureAwait(false);
+                await Console.Out.WriteLineAsync('s').ConfigureAwait(false);
                 int delay;
                 lock (random)
                 {
