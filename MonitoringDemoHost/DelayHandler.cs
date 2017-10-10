@@ -6,28 +6,11 @@ using NServiceBus.Logging;
 class DelayHandler : IHandleMessages<object>
 {
     static readonly ILog Log = LogManager.GetLogger<DelayHandler>();
-    static readonly Random Random = new Random();
-    readonly int max;
-
-    public DelayHandler()
-    {
-        lock (Random)
-        {
-            max = Random.Next(100);
-        }
-    }
+    readonly int max = ThreadLocalRandom.Next(100);
 
     public Task Handle(object message, IMessageHandlerContext context)
     {
-        int duration;
-
-        lock (Random)
-        {
-            duration = Random.Next(0, max);
-        }
-
-        Log.InfoFormat("Delaying for {0}ms", duration);
-
-        return Task.Delay(duration);
+        int duration = ThreadLocalRandom.Next(0, max);
+        return Task.Delay(TimeSpan.FromMilliseconds(duration));
     }
 }

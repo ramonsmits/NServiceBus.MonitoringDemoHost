@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="ChaosHandler.cs" />
     <Compile Include="DelayHandler.cs" />
+    <Compile Include="ThreadLocalRandom.cs" />
     <Compile Include="GuidUtility.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
