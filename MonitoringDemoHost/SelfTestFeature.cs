@@ -26,7 +26,7 @@ namespace Store.Shared.SelfTest
 
         protected override Task OnStart(IMessageSession session)
         {
-            loop = Loop(session);
+            loop = Task.Run(() => Loop(session));
             return Task.CompletedTask;
         }
 
