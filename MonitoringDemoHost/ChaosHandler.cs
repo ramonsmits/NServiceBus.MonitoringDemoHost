@@ -6,7 +6,7 @@ using NServiceBus.Logging;
 class ChaosHandler : IHandleMessages<object>
 {
     readonly ILog Log = LogManager.GetLogger<ChaosHandler>();
-    readonly double Thresshold = ThreadLocalRandom.NextDouble() * 0.50;
+    readonly double Thresshold = ThreadLocalRandom.NextDouble() * 0.05;
 
     public Task Handle(object message, IMessageHandlerContext context)
     {
