@@ -90,6 +90,7 @@ class Program
 
         var transport = cfg.UseTransport<RabbitMQTransport>();
         transport.ConnectionString("host=localhost");
+        transport.DelayedDelivery().DisableTimeoutManager();
 
         var hostId = UseRandomHostId
             ? Guid.NewGuid()
@@ -131,6 +132,7 @@ class Program
 
         cfg.HeartbeatPlugin(HeartbeatQueue, HeartbeatInterval, HeartbeatTTL);
 
+        cfg.PurgeOnStartup(true);
         return (endpointName, await Endpoint.Start(cfg).ConfigureAwait(false));
     }
 }
