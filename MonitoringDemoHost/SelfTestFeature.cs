@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
@@ -37,7 +38,7 @@ namespace Store.Shared.SelfTest
 
             while (!stop)
             {
-                await session.SendLocal(new Ping()).ConfigureAwait(false);
+                session.SendLocal(new Ping());
                 int delay = ThreadLocalRandom.Next(min, max);
                 await Task.Delay(TimeSpan.FromMilliseconds(delay)).ConfigureAwait(false);
             }
