@@ -9,6 +9,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="NServiceBus.Metrics.ServiceControl" Version="2.0.0-beta0002" />
     <PackageReference Include="NServiceBus.RabbitMQ" Version="4.4.0" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
@@ -33,37 +34,37 @@ class Program
 
         var providers = new[] { "Payment", "Audit", "Approval", "Ledger", "Integration", "Broadcast", "Notification", "Identity", "Report", "Exchange" };
         var types = new[] { "Service", "Gateway", "Adapter", "Translator", "Provider", "Generator" };
-        var ou = new[] { "Sales", "Transport", "Accounting", "Marketing", "Support", "Development", "Research", "HumanResourceManagement", "Production", "Purchasing" };
+        var ou = new[] { "Sales",  "Billing", "Shipping", "Transport", "Accounting", "Marketing", "Support", "Development", "Research", "HumanResourceManagement", "Production", "Purchasing" };
 
         var random = new Random(1337); // Makes sure that random endpoints names are repeatable
 
-        Console.WriteLine("Creating instances");
+        WL("Creating instances");
         var start = Stopwatch.StartNew();
         var tasks = new List<Task<(string name, IEndpointInstance)>>();
         for (int i = 0; i < EndpointSize; ++i)
         {
-            var endpointName = $"$ParticularLabs.{ou[random.Next(ou.Length)]}.{providers[random.Next(providers.Length)]}{types[random.Next(types.Length)]}";
-            await Console.Out.WriteAsync($"\tInitializing {endpointName}").ConfigureAwait(false);
+            var endpointName = $"{ou[random.Next(ou.Length)]}.{providers[random.Next(providers.Length)]}{types[random.Next(types.Length)]}";
+            W($"\tInitializing {endpointName}");
             for (int j = 0; j < i % InstanceModulo + 1; j++)
             {
-                await Console.Out.WriteAsync(".").ConfigureAwait(false);
+                W(".");
                 tasks.Add(Create(endpointName, j));
             }
-            await Console.Out.WriteLineAsync().ConfigureAwait(false);
+            WL();
         }
 
-        await Console.Out.WriteAsync("Starting...").ConfigureAwait(false);
+        WL("Starting...");
         Instances = await Task.WhenAll(tasks).ConfigureAwait(false);
-        await Console.Out.WriteLineAsync($"Done! Took {start.Elapsed} to start {Instances.Length} instances.").ConfigureAwait(false);
-        await Console.Out.WriteLineAsync("Press ESC to exit...").ConfigureAwait(false);
+        WL($"Done! Took {start.Elapsed} to start {Instances.Length} instances.");
+        WL("Press ESC to exit...");
 
         while (Console.ReadKey().Key != ConsoleKey.Escape)
         {
         }
 
-        await Console.Out.WriteLineAsync("Stopping...").ConfigureAwait(false);
+        WL("Stopping...");
         await Task.WhenAll(Instances.Select(x => x.instance.Stop())).ConfigureAwait(false);
-        await Console.Out.WriteLineAsync("Stopped!").ConfigureAwait(false);
+        WL("Stopped!");
     }
 
     static async Task<(string name, IEndpointInstance)> Create(string endpointName, int instanceNr)
@@ -91,6 +92,15 @@ class Program
         var transport = cfg.UseTransport<RabbitMQTransport>();
         transport.ConnectionString("host=localhost");
         transport.DelayedDelivery().DisableTimeoutManager();
+        var pipeline = cfg.Pipeline;
+        pipeline.Register(
+            behavior: new RandomMessageTypeIncoming(),
+            description: nameof(RandomMessageTypeIncoming));
+
+        pipeline.Register(
+            //behavior: new RateLimitBehavior(ThreadLocalRandom.Next(1, 10) * 100, TimeSpan.FromSeconds(10)),
+            behavior: new RateLimitBehavior(100, TimeSpan.FromSeconds(10)),
+            description: nameof(RateLimitBehavior));
 
         var hostId = UseRandomHostId
             ? Guid.NewGuid()
@@ -103,7 +113,9 @@ class Program
 
 #pragma warning disable 618
 
+        string domainName = IPGlobalProperties.GetIPGlobalProperties().DomainName;
         var fakeHostName = Dns.GetHostName() + instanceSuffix;
+        fakeHostName += "." + domainName;
         var instanceId = endpointName + "@" + fakeHostName;
 
         var metrics = cfg.EnableMetrics();
@@ -121,10 +133,10 @@ class Program
         //        switch (s.Name)
         //        {
         //            case "# of msgs failures / sec":
-        //                s.Register((ref SignalEvent @event) => Console.Out.WriteAsync("f"));
+        //                s.Register((ref SignalEvent @event) => W("f"));
         //                break;
         //            case "# of msgs successfully processed / sec":
-        //                s.Register((ref SignalEvent @event) => Console.Out.WriteAsync("."));
+        //                s.Register((ref SignalEvent @event) => W("."));
         //                break;
         //        }
         //    }
@@ -134,5 +146,14 @@ class Program
 
         cfg.PurgeOnStartup(true);
         return (endpointName, await Endpoint.Start(cfg).ConfigureAwait(false));
+    }
+
+    static void WL(string value = null)
+    {
+        Console.Out.WriteLineAsync(value).ConfigureAwait(false);
+    }
+    static void W(string value = null)
+    {
+        Console.Out.WriteAsync(value).ConfigureAwait(false);
     }
 }

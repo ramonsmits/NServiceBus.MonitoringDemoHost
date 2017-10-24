@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Logging;
@@ -6,11 +7,12 @@ using NServiceBus.Logging;
 class DelayHandler : IHandleMessages<object>
 {
     static readonly ILog Log = LogManager.GetLogger<DelayHandler>();
-    readonly int max = ThreadLocalRandom.Next(10000);
+    readonly ConcurrentDictionary<string, int> durations = new ConcurrentDictionary<string, int>();
 
     public Task Handle(object message, IMessageHandlerContext context)
     {
-        int duration = ThreadLocalRandom.Next(0, max);
+        var enclosedMessageTypes = context.MessageHeaders[Headers.EnclosedMessageTypes];
+        int duration = durations.GetOrAdd(enclosedMessageTypes, k => ThreadLocalRandom.Next(2500));
         return Task.Delay(TimeSpan.FromMilliseconds(duration));
     }
 }
