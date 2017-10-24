@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using NServiceBus;
 using NServiceBus.Features;
 using NServiceBus.Logging;
 
-namespace Store.Shared.SelfTest
+namespace SelfTest
 {
     class SelfTestFeature : Feature
     {
@@ -33,16 +32,17 @@ namespace Store.Shared.SelfTest
 
         async Task Loop(IMessageSession session)
         {
-            var min = ThreadLocalRandom.Next(100);
-            var max = ThreadLocalRandom.Next(min, 1000);
+            var min = ThreadLocalRandom.Next(10);
+            var max = ThreadLocalRandom.Next(min, 500);
 
             while (!stop)
             {
-                session.SendLocal(new Ping());
+                session.SendLocal(new Ping()).ConfigureAwait(false);
                 int delay = ThreadLocalRandom.Next(min, max);
                 await Task.Delay(TimeSpan.FromMilliseconds(delay)).ConfigureAwait(false);
             }
         }
+
         protected override Task OnStop(IMessageSession session)
         {
             stop = true;
