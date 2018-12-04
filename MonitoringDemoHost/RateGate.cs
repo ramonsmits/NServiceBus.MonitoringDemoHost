@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -83,18 +84,17 @@ public sealed class RateGate : IDisposable
         //_exitTimer = new Timer(ExitTimerCallback, null, timeUnit, TimeSpan.FromMilliseconds(-1));
         _exitTimer = new Timer(ExitTimerCallback, null, timeUnit, DisablePeriodicSignaling);
     }
-    private long GetTicks => Stopwatch.GetTimestamp();
 
     // Callback for the exit timer that exits the semaphore based on exit times 
     // in the queue and then sets the timer for the nextexit time.
     private void ExitTimerCallback(object state)
     {
-        while(true)
+        while (true)
         {
             // While there are exit times that are passed due still in the queue,
             // exit the semaphore and dequeue the exit time.
             long exitTime;
-            while (_exitTimes.TryPeek(out exitTime) && (exitTime - GetTicks) <= 0)
+            while (_exitTimes.TryPeek(out exitTime) && (exitTime - Stopwatch.GetTimestamp()) <= 0)
             {
                 _semaphore.Release();
                 _exitTimes.TryDequeue(out exitTime);
@@ -105,7 +105,7 @@ public sealed class RateGate : IDisposable
             // queue is empty, then no exit times will occur until at least
             // one time unit has passed.
             long ticksUntilNextCheck = _exitTimes.TryPeek(out exitTime)
-                ? exitTime - GetTicks
+                ? exitTime - Stopwatch.GetTimestamp()
                 : TimeUnitTicks;
 
             // Set the timer.
@@ -141,7 +141,7 @@ public sealed class RateGate : IDisposable
         // and add it to the queue.
         if (entered)
         {
-            var timeToExit = GetTicks + TimeUnitTicks;
+            var timeToExit = Stopwatch.GetTimestamp() + TimeUnitTicks;
             _exitTimes.Enqueue(timeToExit);
         }
 
