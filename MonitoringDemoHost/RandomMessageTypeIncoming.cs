@@ -6,10 +6,17 @@ using NServiceBus.Pipeline;
 public class RandomMessageTypeIncoming :
     Behavior<IIncomingPhysicalMessageContext>
 {
-    static readonly string[] types = { "A", "B", "C" };
+    private static readonly string[] a =
+    {
+        "Order", "Customer", "Email", "Employee", "Audit", "Payment", "Report", "Booking", "Transport", "Supplier" 
+        
+    };
+    private static readonly string[] b =
+    {
+        "Accepted", "Approved", "Canceled", "Closed", "Send", "Reviewed", "Promoted", "Rejected" 
+        
+    };
 
-    private static readonly string[] a = { "Order", "Customer", "Email", "Employee", "Audit", "Payment", "Report", "Booking" };
-    private static readonly string[] b = { "Accepted", "Approved", "Canceled", "Closed", "Send", "Reviewed", "Promoted", "" };
     public override Task Invoke(IIncomingPhysicalMessageContext context, Func<Task> next)
     {
         var messageType = RandomNext(a) + RandomNext(b);
