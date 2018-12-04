@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonitoringDemoHost", "MonitoringDemoHost\MonitoringDemoHost.csproj", "{928321C3-8AFE-4B31-8C57-CA65A95E5857}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Metrics.ServiceControl.AppConfig-5", "MonitoringV5\NServiceBus.Metrics.ServiceControl.AppConfig-5.csproj", "{B5644C11-BBA6-4F6E-81F5-4DE024E22FCF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NServiceBus.Metrics.ServiceControl.AppConfig-6", "MonitoringV6\NServiceBus.Metrics.ServiceControl.AppConfig-6.csproj", "{C4623DB9-5ED5-4862-8020-42F1E8CB5A36}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{928321C3-8AFE-4B31-8C57-CA65A95E5857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{928321C3-8AFE-4B31-8C57-CA65A95E5857}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{928321C3-8AFE-4B31-8C57-CA65A95E5857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5644C11-BBA6-4F6E-81F5-4DE024E22FCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5644C11-BBA6-4F6E-81F5-4DE024E22FCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5644C11-BBA6-4F6E-81F5-4DE024E22FCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5644C11-BBA6-4F6E-81F5-4DE024E22FCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4623DB9-5ED5-4862-8020-42F1E8CB5A36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4623DB9-5ED5-4862-8020-42F1E8CB5A36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4623DB9-5ED5-4862-8020-42F1E8CB5A36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4623DB9-5ED5-4862-8020-42F1E8CB5A36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
