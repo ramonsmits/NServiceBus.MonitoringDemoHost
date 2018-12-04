@@ -2,25 +2,29 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net47</TargetFramework>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TargetFramework>net471</TargetFramework>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NServiceBus.Metrics.ServiceControl" Version="2.0.0-beta0002" />
-    <PackageReference Include="NServiceBus.RabbitMQ" Version="4.4.0" />
-    <PackageReference Include="ServiceControl.Plugin.Nsb6.Heartbeat" Version="3.0.1" />
+    <PackageReference Include="NServiceBus" Version="7.*" />
+    <PackageReference Include="NServiceBus.Heartbeat" Version="3.0.0" />
+    <PackageReference Include="NServiceBus.Metrics.PerformanceCounters" Version="3.0.0" />
+    <PackageReference Include="NServiceBus.Metrics.ServiceControl" Version="3.0.2" />
+    <PackageReference Include="NServiceBus.RabbitMQ" Version="5.0.1" />
+    <PackageReference Include="NServiceBus.SqlServer" Version="4.1.0" />
+    <PackageReference Include="NServiceBus.Transport.Msmq" Version="1.0.0" />
+    <!-- <PackageReference Include="ServiceControl.Plugin.Nsb6.Heartbeat" Version="3.*" /> -->
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
   </ItemGroup>
 
 </Project>
